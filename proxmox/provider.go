@@ -1,8 +1,11 @@
 package proxmox
 
 import (
-    "github.com/hashicorp/terraform/helper/schema"
-    "github.com/hashicorp/terraform/terraform"
+	"net/url"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
+	"github.com/xabito/gopve"
 )
 
 func Provider() terraform.ResourceProvider {
@@ -44,14 +47,31 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-	cfg := Config{
-		proxmoxUri:         d.Get("proxmox_uri").(string),
-		proxmoxUser:        d.Get("proxmox_user").(string),
-		proxmoxPassword:    d.Get("proxmox_password").(string),
-		proxmoxInvalidCert: d.Get("proxmox_invalid_cert").(bool),
+func providerConfigure(d *schema.ResourceData) (*gopve.GoPVE, error) {
+	uri, err := url.Parse(d.Get("proxmox_uri").(string))
+	if err != nil {
+		return nil, err
 	}
 
-	pve, err := proxmox.CreateFromConfig(cfg)
-	return  &pve, err
+	scheme := uri.Scheme
+	if scheme == "" {
+		scheme = "https"
+	}
+
+	port := uri.Port()
+	if port == "" {
+		port = "8006"
+	}
+
+	cfg := &gopve.Config{
+		Schema:      scheme,
+		Host:        uri.Hostname(),
+		Port:        port,
+		User:        d.Get("proxmox_user").(string),
+		Password:    d.Get("proxmox_password").(string),
+		InvalidCert: d.Get("proxmox_invalid_cert").(bool),
+	}
+
+	pve, err := NewGoPVE(cfg)
+	return &pve, err
 }

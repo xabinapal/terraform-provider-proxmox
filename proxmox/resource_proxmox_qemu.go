@@ -6,6 +6,11 @@ import (
 
 func resourceProxmoxQemu() *schema.Resource {
 	return &schema.Resource{
+		Read:   resourceProxmoxQemucRead,
+		Create: resourceProxmoxQemucCreate,
+		Update: resourceProxmoxQemucUpdate,
+		Delete: resourceProxmoxQemucDelete,
+
 		Schema: map[string]*schema.Schema{
 			"node": {
 				Type: schema.TypeString,
@@ -55,4 +60,28 @@ func resourceProxmoxQemu() *schema.Resource {
 			}
 		}
 	}
+}
+
+func resourceProxmoxQemuRead(d *schema.ResourceData, meta interface{}) error {
+	pve := meta.(*gopve.GoPVE)
+	node := d.Get("node").(string)
+	vmid := d.Get("vmid").(string)
+}
+
+func resourceProxmoxQemuCreate(d *schema.ResourceData, meta interface{}) error {
+	pve := meta.(*gopve.GoPVE)
+	node := d.Get("node").(string)
+	vmid := d.Get("vmid").(string)
+
+	return resourceProxmoxLxcRead(d, meta)
+}
+
+func resourceProxmoxQemuUpdate(d *schema.ResourceData, meta interface{}) error {
+	pve := meta.(*gopve.GoPVE)
+
+	return resourceProxmoxLxcRead(d, meta)
+}
+
+func resourceProxmoxQemuDelete(d *schema.ResourceData, meta interface{}) error {
+	pve := meta.(*gopve.GoPVE)
 }
