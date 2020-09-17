@@ -1,5 +1,5 @@
 .DS_Store
-terraform-provider-hashicups
+terraform-provider-proxmox
 bin
 
 # Local .terraform directories
